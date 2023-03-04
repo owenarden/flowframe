@@ -121,11 +121,12 @@ trait Policies[T <: PolicyLang] {
         override def subst(substMap: Map[AbstractPolicy, PolicyExpr], seen: Set[PolicyExpr] = Set.empty)
                           (implicit lattice: SecLattice): PolicyExpr = {
             substMap.get(this) match {
-                // case Some(sub) if seen.contains(sub) =>
+                 case Some(sub) if seen.contains(sub) =>
                 //     // if there is a cycle in the bound graph, then apply cycleOp to the cycle. Typically this is a meet or join
                 //     // 1) all policies in the cycle are equivalent, and 2) for GLB, this parameter flows to anything
                 //     // we can prove at least one of these policies flows to
-                //     lattice.simplify(seen.foldLeft(sub)((acc, p) => cycleOp(lattice)(acc, p)))
+                     throw new InternalError("Found cycle in bound graph " + seen.toString())
+//                     lattice.simplify(seen.foldLeft(sub)((acc, p) => cycleOp(lattice)(acc, p)))
 
                 case Some(sub) =>
                     // only recurse if we haven't seen this bound before
