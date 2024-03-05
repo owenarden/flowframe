@@ -387,7 +387,12 @@ abstract class CheckLabels[T <: PolicyLang] extends PluginComponent with SparkSi
                     traverse(qual)
 
                     if (!t.hasAttachment[PolicyStruct]) {
-                        val accessPath: PolicyExpr = getPolicyStruct(qual).get.asInstanceOf[PolicyStructExpr].expr.join(ambientAccessPath)
+                        val accessPath: PolicyExpr = getPolicyStruct(qual).get match {
+                            case PolicyStructExpr(expr) =>
+                                expr.join(ambientAccessPath)
+                            case sig: PolicySignature =>
+                                ambientAccessPath
+                        }
 
                         t.symbol match {
                             case msym: Symbol if (msym.isMethod && msym.paramss.nonEmpty) || msym.isAnonymousFunction => {

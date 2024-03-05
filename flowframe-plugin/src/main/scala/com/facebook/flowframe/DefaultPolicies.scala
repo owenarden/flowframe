@@ -118,7 +118,7 @@ trait DefaultPolicies[T <: PolicyLang] extends AbstractPolicies[T] {
     def defaultPolicyStruct(sym: Symbol)(implicit lattice: SecLattice): PolicyStruct = {
         // TODO Rolph also check that return type is not a function before converting to policy struct expr
         // TODO Rolph handle Function types and anonymous functions?
-        if (sym.isMethod && sym.paramss.nonEmpty) {
+        if (sym.isMethod && sym.paramss.nonEmpty || definitions.isFunctionSymbol(sym.tpe.typeSymbol)) {
             defaultPolicySignature(sym)
 
         } else {
