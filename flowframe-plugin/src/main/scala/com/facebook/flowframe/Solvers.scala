@@ -103,7 +103,7 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
         protected var constraint_set: m.Set[Constraint] = new m.LinkedHashSet[Constraint]
 
         /** Failed constraints */
-        protected var failedConstraints = new m.MutableList[Constraint]
+        //protected var failedConstraints = new m.MutableList[Constraint]
 
         /**
          * Map from variables to (Set of) equations that may be invalidated by
@@ -174,13 +174,13 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
         final def copy(implicit lattice: SecLattice): GLBSolver = {
             val copy = new GLBSolver(lattice)
             copy.Q = new ConstraintQueue() ++= Q
-            copy.constraint_set = constraint_set.to[m.LinkedHashSet]
+            copy.constraint_set = constraint_set.to(m.LinkedHashSet)
             copy.varEqnDependencies = varEqnDependencies
             copy.eqnVarDependencies = eqnVarDependencies
             //copy.traces
             copy.status = status
             copy.fixedValueVars = fixedValueVars
-            copy.failedConstraints = new m.MutableList[Constraint]
+            //copy.failedConstraints = new m.MutableList[Constraint]
             copy.varBounds = new m.HashMap[AbstractPolicy, PolicyExpr].withDefaultValue(defaultBound) ++= varBounds
             copy
         }
@@ -214,7 +214,7 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
             for {v <- awakeable} addDependency(v, c)
         }
 
-        protected def addDependency(c: Constraint, v: SolverVar) {
+        protected def addDependency(c: Constraint, v: SolverVar) : Unit = {
             val cs: m.Set[Constraint] =
                 if (!varEqnReverseDependencies.contains(v)) {
                     val cs = new m.LinkedHashSet[Constraint]
@@ -236,7 +236,7 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
             vs.add(v)
         }
 
-        protected def addDependency(v: SolverVar, c: Constraint) {
+        protected def addDependency(v: SolverVar, c: Constraint)  : Unit = {
             val cs: m.Set[Constraint] =
                 if (!varEqnDependencies.contains(v)) {
                     val cs = new m.LinkedHashSet[Constraint]
@@ -419,11 +419,15 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
         }
     }
 
+    object GLBSolver {
+
+    }
+
     /** Exception thrown when a policy constraint fails to hold.
      *  @param c         The constraint that failed
      *  @param varBounds The values given by the solver to variables in the constraint at the time of failure
      * */
-    final case class PolicyConstraintViolationException(c: Constraint, varBounds: Map[SolverVar, PolicyExpr]) extends Exception {
+    case class PolicyConstraintViolationException(c: Constraint, varBounds: Map[SolverVar, PolicyExpr]) extends Exception {
         def generateViolationMessage(): String = {
             val builder = new m.StringBuilder()
             val lines: Array[String] = c.pos.source.content.mkString.split('\n')

@@ -409,7 +409,7 @@ trait Predicates {
 
     def isUnsat(clauses: List[DisList])(implicit cache: ResolvantCache): Option[ProofStep] = {
         val initOptions = findResolvants(clauses)
-        val queue: Queue[ProofStep] = Queue.empty.enqueue(packResolvants(initOptions, Start).toList)
+        val queue: Queue[ProofStep] = Queue.empty.enqueueAll(packResolvants(initOptions, Start).toList)
         isUnsat_(clauses, queue, Set.empty) match {
             case p@Some(_) => p
             case p@None => p
@@ -426,7 +426,7 @@ trait Predicates {
         val currentClauses: List[DisList] = res :: path(current)
         val neighbors = findResolvants(baseClauses ++ currentClauses)
         val newNeighbors = neighbors.filter { case (parents, _) => !seen_.contains(parents) }
-        val queue_ : Queue[ProofStep] = rest.enqueue(packResolvants(newNeighbors, current))
+        val queue_ : Queue[ProofStep] = rest.enqueueAll(packResolvants(newNeighbors, current))
         isUnsat_(baseClauses, queue_, seen_)
     }
 

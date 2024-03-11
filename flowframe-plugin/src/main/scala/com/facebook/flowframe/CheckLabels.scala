@@ -17,7 +17,7 @@
 package com.facebook.flowframe
 
 import scala.collection.mutable
-import scala.reflect.internal.util.{SourceFile, Statistics}
+import scala.reflect.internal.util.{SourceFile}
 import scala.tools.nsc.plugins.PluginComponent
 import scala.tools.nsc.{Global, Phase}
 
@@ -26,7 +26,7 @@ abstract class CheckLabels[T <: PolicyLang] extends PluginComponent with SparkSi
     val global: Global
     import global._
 
-    val labelcheckNanos: Statistics.Timer = Statistics.newTimer("time spent labelchecking", "check-labels")
+    //val labelcheckNanos: Statistics.Timer = Statistics.newTimer("time spent labelchecking", "check-labels")
     val phaseName: String = "check-labels"
 
     override def description = "Check Purpose Policies Phase"
@@ -56,13 +56,13 @@ abstract class CheckLabels[T <: PolicyLang] extends PluginComponent with SparkSi
     class LabelCheckPhase(prev: Phase) extends StdPhase(prev) {
         override def run(): Unit = {
             try {
-                val start = if (Statistics.canEnable) Statistics.startTimer(labelcheckNanos) else null
+                //val start = if (Statistics.canEnable) Statistics.startTimer(labelcheckNanos) else null
                 global.echoPhaseSummary(this)
                     for (unit <- currentRun.units) {
                         applyPhase(unit)
                         undoLog.clear()
                     }
-                if (Statistics.canEnable) Statistics.stopTimer(labelcheckNanos, start)
+                //if (Statistics.canEnable) Statistics.stopTimer(labelcheckNanos, start)
                 super.run()
             } catch {
                 case exn: PolicyConstraintViolationException =>
@@ -80,7 +80,7 @@ abstract class CheckLabels[T <: PolicyLang] extends PluginComponent with SparkSi
                     val solver = new GLBSolver(lattice)
                     val lc: LabelChecker = LabelChecker(solver, lattice.bottom, lattice.bottom, lattice.bottom)
                     lc.traverse(unit.body)
-                    if (global.settings.Yrangepos && !global.reporter.hasErrors) global.validatePositions(unit.body)
+                    if (global.settings.Yrangepos.value && !global.reporter.hasErrors) global.validatePositions(unit.body)
                     for (workItem <- unit.toCheck) workItem()
 
                     val solution = lc.solver.solve(lattice)

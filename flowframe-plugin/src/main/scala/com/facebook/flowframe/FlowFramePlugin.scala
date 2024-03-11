@@ -26,10 +26,10 @@ class FlowFramePlugin(val global: Global) extends Plugin {
     val name = "flowframe"
     val description = "Check information flow control policies"
 
-    var checkPolicies : CheckLabels[PurposePolicyLang] = new {
+    var checkPolicies : CheckLabels[PurposePolicyLang] = new CheckLabels[PurposePolicyLang] with PurposeParser {
         val global: FlowFramePlugin.this.global.type = FlowFramePlugin.this.global
         override val runsAfter: List[String] = List("typer")
-    } with CheckLabels[PurposePolicyLang] with PurposeParser
+    }
 
     val components: List[PluginComponent] = List[PluginComponent](checkPolicies)
 

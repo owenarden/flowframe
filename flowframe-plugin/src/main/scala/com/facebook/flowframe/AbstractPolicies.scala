@@ -142,7 +142,7 @@ trait AbstractPolicies[T <: PolicyLang] extends Solvers[T] {
      *  This information is computed at the call sites of label-polymorphic functions. */
     case class PolicyRefContext(accessPath: PolicyExpr, arguments: Map[Name, PolicyStruct])
 
-    final case class UnresolvedPolicyRefException(name: String)
+    case class UnresolvedPolicyRefException(name: String)
         extends Exception(s"Cannot resolve policy reference $name")
 
     /** Reference to another policy. */
@@ -233,7 +233,7 @@ trait AbstractPolicies[T <: PolicyLang] extends Solvers[T] {
     }
 
     /** Policy structure for functions/methods. */
-    final case class PolicySignature(accessPath: PolicyExpr, beginPolicy: BoundedParameter, paramssPolicies: List[List[PolicyStruct]], returnPolicy: PolicyStruct)
+    case class PolicySignature(accessPath: PolicyExpr, beginPolicy: BoundedParameter, paramssPolicies: List[List[PolicyStruct]], returnPolicy: PolicyStruct)
         extends PolicyStruct {
 
         override def toString: String = {
@@ -379,7 +379,7 @@ trait AbstractPolicies[T <: PolicyLang] extends Solvers[T] {
         }
     }
 
-    final case class PolicyStructMismatchException(s1: PolicyStruct, s2: PolicyStruct)
+    case class PolicyStructMismatchException(s1: PolicyStruct, s2: PolicyStruct)
         extends Exception(s"Policy struct mismatch between $s1 (${s1.getClass()}) and $s2 (${s2.getClass()})")
 
     /** Resolve policy references in a policy expression.

@@ -15,7 +15,6 @@
  */
 
 package com.facebook.flowframe
-
 import scala.annotation.{ClassfileAnnotation, TypeConstraint}
 
 class Policy(value: String) extends ClassfileAnnotation with TypeConstraint

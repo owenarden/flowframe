@@ -49,7 +49,7 @@ trait SparkSignatures[T <: PolicyLang] extends DefaultPolicies[T] {
 			})(0)
 		} catch {
 			case (e: Throwable) => {
-				error("Exception: " + e.getMessage)
+				globalError("Exception: " + e.getMessage)
 				throw e
 			}
 		}
@@ -97,7 +97,7 @@ trait SparkSignatures[T <: PolicyLang] extends DefaultPolicies[T] {
 			})(0)
 		} catch {
 			case (e: Throwable) => {
-				error("Exception: " + e.getMessage)
+				globalError("Exception: " + e.getMessage)
 				throw e
 			}
 		}

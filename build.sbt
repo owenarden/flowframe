@@ -19,38 +19,48 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 
 import sbt.Resolver
 
-val flowframeVersion = "0.1-SNAPSHOT"
+val flowframeVersion = "0.2-SNAPSHOT"
 
 lazy val commonSettings = Seq(
 	version := flowframeVersion,
-	scalaVersion := "2.11.12",
+	scalaVersion := "2.13.13",
+        scalacOptions += "-deprecation",
+	scalacOptions += "-Wconf:cat=other-match-analysis:s",
 	autoCompilerPlugins := true,
-	resolvers += Resolver.mavenLocal
+	resolvers += Resolver.mavenLocal,
+	Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars
 )
 autoCompilerPlugins := true
 
-resolvers ++= Seq(
-	"Facebook Nexus internal releases" at "https://maven.thefacebook.com/nexus/content/repositories/releases",
-	"Facebook Nexus lib releases" at "https://maven.thefacebook.com/nexus/content/repositories/libs-releases-local",
-	"Facebook Nexus internal snapshots" at "https://maven.thefacebook.com/nexus/content/repositories/snapshots",
-	"Facebook Nexus lib snapshots" at "https://maven.thefacebook.com/nexus/content/repositories/libs-snapshots-local",
-	"Facebook Nexus public" at "https://maven.thefacebook.com/nexus/content/groups/public"
-)
+//resolvers ++= Seq(
+//	"Facebook Nexus internal releases" at "https://maven.thefacebook.com/nexus/content/repositories/releases",
+//	"Facebook Nexus lib releases" at "https://maven.thefacebook.com/nexus/content/repositories/libs-releases-local",
+//	"Facebook Nexus internal snapshots" at "https://maven.thefacebook.com/nexus/content/repositories/snapshots",
+//	"Facebook Nexus lib snapshots" at "https://maven.thefacebook.com/nexus/content/repositories/libs-snapshots-local",
+//	"Facebook Nexus public" at "https://maven.thefacebook.com/nexus/content/groups/public"
+//)
 
 lazy val plugin = project
 	.settings(commonSettings: _*)
 	.settings(
 		name				:= "flowframe",
 		version 			:= flowframeVersion,
-		scalaVersion 		:= "2.11.12",
 		organization 		:= "com.facebook",
 		crossVersion 		:= CrossVersion.full, // compiler api needs full version match
+		//assembly / assemblyJarName := s"${name.value}_${scalaVersion}-${version.value}.jar",
+		//assemblyShadeRules := Seq(
+		//  ShadeRule.rename("scala.util.parsing.combinator.**" -> "shadedParsingCombinatorForFlowFrame.@1").inAll
+		//),
 		libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
 		libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-		libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "3.3.0.0-SNAP3" % Test,
-		libraryDependencies += "org.scalatest" %% "scalatest-propspec" % "3.3.0-SNAP3" % "test",
-		libraryDependencies += "org.scalatest" %% "scalatest-matchers-core" % "3.3.0-SNAP3" % "test",
-		libraryDependencies += "org.scalatest" %% "scalatest-shouldmatchers" % "3.3.0-SNAP3" % "test",
+		libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2", //% "provided",
+		//libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
+		//libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "3.3.0.0-SNAP3" % Test,
+		//libraryDependencies += "org.scalatest" %% "scalatest-propspec" % "3.3.0-SNAP3" % "test",
+		//libraryDependencies += "org.scalatest" %% "scalatest-matchers-core" % "3.3.0-SNAP3" % "test",
+		//libraryDependencies += "org.scalatest" %% "scalatest-shouldmatchers" % "3.3.0-SNAP3" % "test",
+        //libraryDependencies += "org.apache.spark" %% "spark-core" % "3.5.1",
+        //libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.5.1"
 	) in file ("flowframe-plugin")
 
 val pluginJar = plugin / Compile / packageTask
@@ -58,19 +68,23 @@ val pluginJar = plugin / Compile / packageTask
 lazy val runtime = project
 	.settings(commonSettings: _*)
 	.settings(
+		//Compile / fork := true,
 		Test / fork := false,
-		scalacOptions += s"-Xplugin:${pluginJar.value.getAbsolutePath}",
+		//scalacOptions += s"-Jdummy=${pluginJar.value.lastModified}",
 		// build tests with plugin
 		Test/scalacOptions ++= Seq(
+		        s"-Xplugin:${pluginJar.value.getAbsolutePath}",
 			// enable the plugin
 			s"-P:flowframe:lang:purpose",
 			// rebuild when plugin changes
 			s"-Jdummy=${pluginJar.value.lastModified}",
 		),
-		Test/javaOptions += "-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
-		libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % Test,
-		libraryDependencies ++= Seq(
-			"org.apache.spark" %% "spark-core" % "2.3.0",
-			"org.apache.spark" %% "spark-sql" % "2.3.0",
-		),
+		addCompilerPlugin("com.facebook" % s"flowframe_2.13.13" % flowframeVersion),
+		//libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+		//Test/javaOptions += "-J-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005",
+                //libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+		//libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18.0" % Test,
+		//libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
+		//libraryDependencies += "org.apache.spark" %% "spark-core" % "3.5.1",
+			//"org.apache.spark" %% "spark-sql" % "3.5.1",),
 	) in file ("flowframe-runtime")

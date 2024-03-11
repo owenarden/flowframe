@@ -341,7 +341,7 @@ trait PurposePolicies extends AbstractPolicies[PurposePolicyLang] with Predicate
                 else {
                     var subsumed = false
                     for {n <- needed} {
-                        if (!n.hasVariables) {
+                        if (!n.hasVariables()) {
                             if (flowstoNorm(n, j)) {
                                 subsumed = true
                             } else if (flowstoNorm(j, n))
@@ -426,7 +426,7 @@ trait PurposePolicies extends AbstractPolicies[PurposePolicyLang] with Predicate
         disjs.map { case JNorm(conjs) =>
             conjs.map {
                 case WNorm(b, w) =>
-                    if (w == True)
+                    if (w == NormTrue)
                         b
                     else
                         With(b, convertPred(w))

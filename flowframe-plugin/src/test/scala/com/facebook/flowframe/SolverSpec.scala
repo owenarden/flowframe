@@ -35,8 +35,9 @@ class SolverSpec extends AnyPropSpec with GeneratorDrivenPropertyChecks with Pur
 	val reporter = new ConsoleReporter(settings, Console.in, new PrintWriter(Console.out))
 	val global : Global = new Global(settings, reporter)
 
-	implicit val cache = new mutable.LinkedHashMap[List[DisList], List[(Set[DisList], ClauseSet)]]()
-	implicit override val generatorDrivenConfig =
+	implicit val cache: mutable.LinkedHashMap[List[DisList], List[(Set[DisList], ClauseSet)]] 
+		= new mutable.LinkedHashMap[List[DisList], List[(Set[DisList], ClauseSet)]]()
+	implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
 		PropertyCheckConfiguration(minSize = 1)
 
 	//override def overrideParameters(p: Test.Parameters): Test.Parameters = {
