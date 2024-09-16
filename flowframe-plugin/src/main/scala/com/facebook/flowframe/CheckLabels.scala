@@ -334,9 +334,10 @@ abstract class CheckLabels[T <: PolicyLang] extends PluginComponent with SparkSi
                     if (!t.hasAttachment[PolicyStruct]) {
                         // assume that the definition annotation overrides the type annotation
                         // if neither exist, resort to a default policy (generate a solver variable)
-                        val defAnnOpt = getPolicyStruct(t.symbol, withDefault=false)
+                        val defAnn = getPolicyStruct(t.symbol, withDefault=false).getOrElse { defaultPolicyStruct(t.symbol) }
                         val tptAnnOpt = getPolicyStruct(t.tpt.symbol, withDefault=false)
-                        val pol = defAnnOpt.orElse(tptAnnOpt).getOrElse { defaultPolicyStruct(t.symbol) }
+
+                        val pol = if (tptAnnOpt.isDefined) defAnn.join(tptAnnOpt.get) else defAnn
                         // val pol = defAnnOpt.getOrElse { defaultPolicyStruct(t.symbol) }
 
                         t.symbol.updateAttachment[PolicyStruct](pol)

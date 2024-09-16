@@ -44,8 +44,11 @@ trait Solvers[T <: PolicyLang] extends Constraints[T] {
     }
 
     // TODO: isn't this a LUBSolver?
-    class GLBSolver(lattice: SecLattice) {
-
+    class GLBSolver(val lattice: SecLattice) {
+//        val lattice = _lattice
+//        def lattice() = {
+//
+//        }
         import Status._
 
         /**
